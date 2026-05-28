@@ -122,7 +122,7 @@ export default function FinalCTA() {
                 type="submit"
                 className="btn-breathe inline-flex items-center gap-2 px-7 py-4 bg-[#F4845F] text-white font-semibold rounded-2xl hover:bg-[#F16A41] transition-colors duration-200 text-base whitespace-nowrap"
               >
-                Get started free
+                Try Petpulse
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
@@ -135,7 +135,7 @@ export default function FinalCTA() {
             >
               <Heart className="w-5 h-5 text-[#2D9B6F] fill-[#2D9B6F]" />
               <p className="text-[#2D9B6F] font-semibold">
-                You're in! Check your inbox for next steps.
+                You are in! Check your inbox for next steps.
               </p>
             </motion.div>
           )}
