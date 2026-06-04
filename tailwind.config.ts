@@ -10,8 +10,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['Fraunces', 'serif'],
-        body: ['DM Sans', 'sans-serif'],
+        display: ['var(--font-fraunces)', 'Fraunces', 'serif'],
+        body: ['var(--font-dm-sans)', 'DM Sans', 'sans-serif'],
       },
       colors: {
         bg: '#FAFAF7',

@@ -1,14 +1,4 @@
-// PetPulse — Constants & Content
-// All copy, data, and configuration centralized here
-
-export const SITE_CONFIG = {
-  name: "PetPulse",
-  tagline: "AI-powered pet health tracking",
-  description:
-    "AI-assisted pet health tracking through simple photo check-ins between vet visits.",
-  url: "https://petpulse.ai",
-} as const;
-
+// ─── Navigation ─────────────────────────────────────
 export const NAV_ITEMS = [
   { label: "Features", href: "#features" },
   { label: "How it works", href: "#scan-demo" },
@@ -16,162 +6,146 @@ export const NAV_ITEMS = [
   { label: "Pricing", href: "#pricing" },
 ] as const;
 
+// ─── Hero ───────────────────────────────────────────
 export const HERO_CONTENT = {
   brand: "petpulse",
-  headline: "notice health changes\nbefore they become emergencies",
+  headline: ["Notice what changes.", "Before it becomes", "a problem."],
   subtext:
-    "AI-assisted pet health tracking through simple photo check-ins between vet visits.",
-  cta: {
-    primary: "Start free",
-    secondary: "Watch demo",
-  },
-} as const;
+    "AI-assisted health check-ins between vet visits — through photos you already take.",
+  cta: { primary: "Start for free", secondary: "See how it works" },
+  photoCards: [
+    { src: "/images/hero-dog.png", alt: "Golden retriever", chip: "Dental ✓", rotation: -6 },
+    { src: "/images/dog-eye.png", alt: "Dog eye health", chip: "Eyes ✓", rotation: 0 },
+    { src: "/images/dog-posture.png", alt: "Dog posture", chip: "Coat ✓", rotation: 5 },
+  ],
+};
 
+export const BREED_MARQUEE = [
+  { name: "Golden Retriever", emoji: "🐕", note: "Monitor hip joints after age 5" },
+  { name: "Labrador", emoji: "🐶", note: "Watch for eye cloudiness early" },
+  { name: "Persian Cat", emoji: "🐱", note: "Regular dental checks essential" },
+  { name: "Corgi", emoji: "🐾", note: "Back health is critical" },
+  { name: "Beagle", emoji: "🐕‍🦺", note: "Ear infections common — check weekly" },
+  { name: "Dachshund", emoji: "🌭", note: "Spine health monitoring recommended" },
+  { name: "Maine Coon", emoji: "🐈", note: "Heart screening after age 3" },
+  { name: "German Shepherd", emoji: "🦮", note: "Hip dysplasia — early detection matters" },
+  { name: "Poodle", emoji: "🐩", note: "Skin & coat require close monitoring" },
+  { name: "Siamese", emoji: "😸", note: "Dental disease prone — scan monthly" },
+] as const;
+
+// ─── Small Changes ──────────────────────────────────
 export const SMALL_CHANGES_CONTENT = {
-  headline: "Small changes matter",
-  subtext: "Most issues don't appear overnight. They build slowly.",
-  comparisons: [
+  headline: "Most health changes whisper before they shout.",
+  cards: [
     {
       id: "eyes",
-      label: "Eye Clarity",
-      before: "Clear, bright cornea",
-      after: "Early cloudiness detected",
-      annotation: "Corneal opacity +12%",
-      severity: "moderate",
+      image: "/images/dog-eye.png",
+      label: "Slight cloudiness. Easy to miss.",
     },
     {
       id: "gums",
-      label: "Gum Health",
-      before: "Healthy pink gums",
-      after: "Early inflammation signs",
-      annotation: "Gingival index elevated",
-      severity: "mild",
-    },
-    {
-      id: "coat",
-      label: "Coat Condition",
-      before: "Glossy, even coat",
-      after: "Subtle thinning pattern",
-      annotation: "Fur density -8% over 6 weeks",
-      severity: "early",
-    },
-  ],
-} as const;
-
-export const SCAN_DEMO_CONTENT = {
-  headline: "See what AI sees",
-  subtext: "Upload a photo. Get instant health insights.",
-  dropzoneText: "Drop a pet photo or click to scan",
-  scanRegions: [
-    {
-      id: "eyes",
-      label: "Eye Health",
-      confidence: 94,
-      status: "Healthy",
-      x: 35,
-      y: 25,
-      detail: "Clear cornea, normal pupil response",
-    },
-    {
-      id: "coat",
-      label: "Coat Analysis",
-      confidence: 91,
-      status: "Good",
-      x: 55,
-      y: 50,
-      detail: "Even distribution, healthy sheen",
+      image: "/images/dog-gums.png",
+      label: "Pale gums. Often ignored.",
     },
     {
       id: "posture",
-      label: "Body Posture",
-      confidence: 88,
-      status: "Normal",
-      x: 50,
-      y: 70,
-      detail: "Balanced weight distribution",
-    },
-    {
-      id: "ears",
-      label: "Ear Condition",
-      confidence: 96,
-      status: "Healthy",
-      x: 25,
-      y: 18,
-      detail: "No inflammation or discharge",
+      image: "/images/dog-posture.png",
+      label: "Subtle posture shift. Joint pain starting.",
     },
   ],
-  healthScore: 92,
-} as const;
+};
 
+// ─── Scan Demo ──────────────────────────────────────
+export const SCAN_DEMO_CONTENT = {
+  headline: "See it in action",
+  subtext: "Upload a photo. Get instant AI-powered health insights.",
+  image: "/images/scan-dog.png",
+  thinkingTexts: [
+    "Checking retinal clarity...",
+    "Measuring gum saturation...",
+    "Mapping coat density...",
+  ],
+  hotspots: [
+    { id: "eye", x: 35, y: 30, label: "Eye clarity", status: "Good ✓", color: "#2D9B6F" },
+    { id: "gum", x: 50, y: 65, label: "Gum color", status: "Monitor ⚠", color: "#F4845F" },
+    { id: "coat", x: 72, y: 42, label: "Coat texture", status: "Healthy ✓", color: "#2D9B6F" },
+  ],
+  healthScore: 87,
+};
+
+// ─── Timeline ───────────────────────────────────────
 export const TIMELINE_DATA = [
   {
     week: "Week 1",
-    title: "First Scan",
-    description: "Baseline health profile established",
-    score: 92,
-    metrics: {
-      weight: "12.4 kg",
-      activity: "High",
-      appetite: "Normal",
-      mood: "Happy",
-    },
-    highlight: "Baseline established",
+    date: "Jan 6",
+    image: "/images/hero-dog.png",
+    sparkline: [82, 84, 83, 85, 87, 86, 88],
+    metrics: [
+      { label: "Dental", score: 89 },
+      { label: "Eyes", score: 95 },
+      { label: "Coat", score: 91 },
+    ],
+    trend: "+8pts this month",
+    trendUp: true,
   },
   {
     week: "Week 4",
-    title: "Subtle Shift",
-    description: "AI detects minor coat density change",
-    score: 87,
-    metrics: {
-      weight: "12.2 kg",
-      activity: "Moderate",
-      appetite: "Slight decrease",
-      mood: "Calm",
-    },
-    highlight: "Coat density -3%",
+    date: "Jan 27",
+    image: "/images/dog-eye.png",
+    sparkline: [88, 87, 85, 86, 84, 83, 82],
+    metrics: [
+      { label: "Dental", score: 85 },
+      { label: "Eyes", score: 88 },
+      { label: "Coat", score: 90 },
+    ],
+    trend: "−3pts slight dip",
+    trendUp: false,
   },
   {
-    week: "Week 10",
-    title: "Early Alert",
-    description: "Vet visit recommended — potential allergy detected",
-    score: 78,
-    metrics: {
-      weight: "11.8 kg",
-      activity: "Low",
-      appetite: "Decreased",
-      mood: "Lethargic",
-    },
-    highlight: "Vet visit recommended",
+    week: "Week 8",
+    date: "Feb 17",
+    image: "/images/scan-dog.png",
+    sparkline: [82, 84, 87, 89, 91, 92, 94],
+    metrics: [
+      { label: "Dental", score: 92 },
+      { label: "Eyes", score: 96 },
+      { label: "Coat", score: 93 },
+    ],
+    trend: "+12pts recovery",
+    trendUp: true,
   },
 ] as const;
 
+// ─── Emotional ──────────────────────────────────────
+export const EMOTIONAL_CONTENT = {
+  line1: "Because 'Is she okay?'",
+  line2: "deserves a real answer.",
+  bgImage: "/images/emotional-bg.png",
+};
+
+// ─── Pricing ────────────────────────────────────────
 export const PRICING_TIERS = [
   {
     name: "Free",
     price: "$0",
-    period: "forever",
-    description: "Get started with basic health tracking",
-    features: [
-      "2 pet profiles",
-      "Monthly photo check-ins",
-      "Basic health score",
-      "Community access",
-    ],
-    cta: "Get started",
+    period: "mo",
+    description: "Get started with basic health insights.",
+    features: ["5 scans per month", "2 pet profiles", "Basic health scores", "Scan history"],
+    cta: "Start free",
     highlighted: false,
   },
   {
     name: "Plus",
     price: "$9",
-    period: "per month",
-    description: "Advanced insights for proactive pet parents",
+    period: "mo",
+    description: "Smarter monitoring for dedicated pet parents.",
     features: [
+      "Unlimited scans",
       "5 pet profiles",
-      "Weekly photo check-ins",
-      "Advanced AI analysis",
-      "Health trend reports",
-      "Vet sharing portal",
-      "Priority support",
+      "Breed-specific monitoring",
+      "Vet chat (3x/month)",
+      "Health trend alerts",
+      "Export reports",
     ],
     cta: "Start free trial",
     highlighted: true,
@@ -179,30 +153,41 @@ export const PRICING_TIERS = [
   {
     name: "Premium",
     price: "$19",
-    period: "per month",
-    description: "Complete care for multi-pet families",
+    period: "mo",
+    description: "Complete care for your whole family of pets.",
     features: [
+      "Everything in Plus",
       "Unlimited pet profiles",
-      "Daily photo check-ins",
-      "Real-time health monitoring",
-      "Predictive health alerts",
-      "Vet direct connect",
+      "Priority vet chat",
+      "Insurance claim reports",
       "Family sharing",
-      "API access",
+      "Priority support",
     ],
     cta: "Start free trial",
     highlighted: false,
   },
 ] as const;
 
-export const EMOTIONAL_CONTENT = {
-  line1: "Because 'Is she okay?'",
-  line2: "is a question every pet owner asks.",
-} as const;
-
+// ─── Final CTA ──────────────────────────────────────
 export const FINAL_CTA_CONTENT = {
-  headline: "Start noticing the things\nyou normally miss.",
-  subtext: "Join the waitlist for early access.",
+  headline: "Start noticing the things you normally miss.",
   placeholder: "Enter your email",
-  cta: "Join waitlist",
-} as const;
+  cta: "Start for free",
+  disclaimer: "No commitment. Cancel anytime. First scan free.",
+};
+
+// ─── Toast notifications ────────────────────────────
+export const TOAST_MESSAGES = [
+  { emoji: "🐕", title: "Max completed his weekly scan", body: "All clear — no changes detected", accent: "#2D9B6F" },
+  { emoji: "🐱", title: "Luna's dental score improved 12pts", body: "Keep up the brushing routine!", accent: "#2D9B6F" },
+  { emoji: "⚠️", title: "Buddy's gum color needs monitoring", body: "Tap to see full report", accent: "#F4845F" },
+  { emoji: "🎉", title: "Charlie — 6 months perfect scores!", body: "Share your streak →", accent: "#2D9B6F" },
+] as const;
+
+// ─── Stats ──────────────────────────────────────────
+export const STATS = [
+  { value: 94, suffix: "%", label: "Detection accuracy" },
+  { value: 2.3, suffix: "s", label: "Average scan time" },
+  { value: 1200, prefix: "$", label: "Avg savings per catch" },
+  { value: 50000, suffix: "+", label: "Pets monitored" },
+] as const;
