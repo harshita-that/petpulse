@@ -121,10 +121,10 @@ export default function HeroSection() {
               variants={fadeUpVariants}
               className="flex flex-col sm:flex-row gap-3"
             >
-              <button className="btn-breathe inline-flex items-center gap-2 px-7 py-4 bg-[#F4845F] text-white font-semibold rounded-full hover:bg-[#F16A41] transition-colors duration-200 text-base">
+              <a href="/signup" className="btn-breathe inline-flex items-center gap-2 px-7 py-4 bg-[#F4845F] text-white font-semibold rounded-full hover:bg-[#F16A41] transition-colors duration-200 text-base">
                 Start for free
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </a>
               <button className="inline-flex items-center gap-2 px-7 py-4 border-2 border-[#E8E4DA] text-[#1A1A1A] font-semibold rounded-full hover:border-[#2D9B6F] hover:text-[#2D9B6F] transition-all duration-200 text-base bg-white/50">
                 <Play className="w-4 h-4 fill-current" />
                 See how it works
