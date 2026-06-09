@@ -100,18 +100,24 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* ── Right: CTA + Hamburger ─────── */}
+          {/* ── Right: Auth + Hamburger ─────── */}
           <div className="flex items-center gap-3">
             <a
-              href="#pricing"
-              onClick={(e) => handleNavClick(e, "#pricing")}
+              href="/login"
+              className="hidden sm:inline-flex items-center px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:bg-[#F3F0E8]"
+              style={{ color: "#1A1A1A" }}
+            >
+              Sign in
+            </a>
+            <a
+              href="/signup"
               className="hidden sm:inline-flex items-center px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
               style={{
                 background: "#F4845F",
                 color: "#FFFFFF",
               }}
             >
-              Start free
+              Sign up
             </a>
 
             {/* Mobile hamburger */}
@@ -192,7 +198,7 @@ export default function Navbar() {
                 </motion.div>
               ))}
 
-              {/* Mobile CTA */}
+              {/* Mobile Auth */}
               <motion.div
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -202,18 +208,24 @@ export default function Navbar() {
                   duration: 0.4,
                   ease: [0.21, 0.47, 0.32, 0.98],
                 }}
-                className="mt-6"
+                className="mt-6 flex flex-col items-center gap-3"
               >
                 <a
-                  href="#pricing"
-                  onClick={(e) => handleNavClick(e, "#pricing")}
+                  href="/signup"
                   className="inline-flex items-center px-8 py-3 rounded-full text-base font-semibold transition-all duration-200 hover:shadow-md"
                   style={{
                     background: "#F4845F",
                     color: "#FFFFFF",
                   }}
                 >
-                  Start free
+                  Sign up
+                </a>
+                <a
+                  href="/login"
+                  className="inline-flex items-center px-8 py-3 rounded-full text-base font-semibold transition-all duration-200"
+                  style={{ color: "#1A1A1A" }}
+                >
+                  Sign in
                 </a>
               </motion.div>
             </nav>
