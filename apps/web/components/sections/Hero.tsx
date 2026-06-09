@@ -216,7 +216,7 @@ export default function Hero() {
             <div className="flex flex-wrap items-center gap-4 mt-8">
               {/* Primary CTA */}
               <motion.a
-                href="#pricing"
+                href="/signup"
                 className="inline-flex items-center px-6 py-3 rounded-full text-base font-semibold shadow-md"
                 style={{ background: "#F4845F", color: "#FFFFFF" }}
                 whileHover={{
