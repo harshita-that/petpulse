@@ -19,12 +19,14 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const { error: signupError } = await supabase.auth.signUp({
+    const { data, error: signupError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -34,6 +36,13 @@ export default function SignupPage() {
 
     if (signupError) {
       setError(signupError.message);
+      setLoading(false);
+      return;
+    }
+
+    // If session is null after signup, email confirmation is required
+    if (!data.session) {
+      setShowConfirmation(true);
       setLoading(false);
       return;
     }
@@ -144,77 +153,102 @@ export default function SignupPage() {
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Full name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
-                required
-                className="w-full px-4 py-3 rounded-xl border-2 border-[#E8E4DA] bg-white focus:border-[#2D9B6F] focus:outline-none transition-colors text-[#1A1A1A] placeholder:text-[#B8B3A8]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Email</label>
-              <div className="relative">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  className="w-full px-4 py-3 pl-11 rounded-xl border-2 border-[#E8E4DA] bg-white focus:border-[#2D9B6F] focus:outline-none transition-colors text-[#1A1A1A] placeholder:text-[#B8B3A8]"
-                />
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8B3A8]" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min. 6 characters"
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-[#E8E4DA] bg-white focus:border-[#2D9B6F] focus:outline-none transition-colors text-[#1A1A1A] placeholder:text-[#B8B3A8]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#B8B3A8] hover:text-[#6B7280]"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#F4845F] text-white font-semibold rounded-xl hover:bg-[#F16A41] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          {showConfirmation ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-8"
             >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  Create account
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
+              <div className="w-16 h-16 bg-[#E8F5EF] rounded-full flex items-center justify-center mx-auto mb-6">
+                <Mail className="w-8 h-8 text-[#2D9B6F]" />
+              </div>
+              <h3 className="text-2xl font-display font-bold text-[#1A1A1A] mb-3">Check your email</h3>
+              <p className="text-[#6B7280] mb-8">
+                We sent a confirmation link to <span className="font-semibold text-[#1A1A1A]">{email}</span>. 
+                Please click the link to verify your account and sign in.
+              </p>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center px-6 py-3 bg-[#E8F5EF] text-[#2D9B6F] font-semibold rounded-xl hover:bg-[#D4F0E4] transition-colors"
+              >
+                Back to Sign in
+              </Link>
+            </motion.div>
+          ) : (
+            <>
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Full name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                    required
+                    className="w-full px-4 py-3 rounded-xl border-2 border-[#E8E4DA] bg-white focus:border-[#2D9B6F] focus:outline-none transition-colors text-[#1A1A1A] placeholder:text-[#B8B3A8]"
+                  />
+                </div>
 
-          <p className="mt-6 text-xs text-center text-[#6B7280]">
-            By creating an account, you agree to our{' '}
-            <a href="#" className="text-[#2D9B6F] hover:underline">Terms</a> and{' '}
-            <a href="#" className="text-[#2D9B6F] hover:underline">Privacy Policy</a>.
-          </p>
+                <div>
+                  <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Email</label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      required
+                      className="w-full px-4 py-3 pl-11 rounded-xl border-2 border-[#E8E4DA] bg-white focus:border-[#2D9B6F] focus:outline-none transition-colors text-[#1A1A1A] placeholder:text-[#B8B3A8]"
+                    />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8B3A8]" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">Password</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Min. 6 characters"
+                      required
+                      minLength={6}
+                      className="w-full px-4 py-3 rounded-xl border-2 border-[#E8E4DA] bg-white focus:border-[#2D9B6F] focus:outline-none transition-colors text-[#1A1A1A] placeholder:text-[#B8B3A8]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#B8B3A8] hover:text-[#6B7280]"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#F4845F] text-white font-semibold rounded-xl hover:bg-[#F16A41] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      Create account
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <p className="mt-6 text-xs text-center text-[#6B7280]">
+                By creating an account, you agree to our{' '}
+                <a href="#" className="text-[#2D9B6F] hover:underline">Terms</a> and{' '}
+                <a href="#" className="text-[#2D9B6F] hover:underline">Privacy Policy</a>.
+              </p>
+            </>
+          )}
         </motion.div>
       </div>
     </div>

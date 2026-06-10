@@ -29,7 +29,11 @@ export default function LoginPage() {
     });
 
     if (loginError) {
-      setError(loginError.message);
+      if (loginError.message.includes('Email not confirmed')) {
+        setError('Please check your email and click the confirmation link to sign in.');
+      } else {
+        setError(loginError.message);
+      }
       setLoading(false);
       return;
     }
