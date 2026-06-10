@@ -155,4 +155,49 @@ export const scansRouter = router({
 
       return data;
     }),
+
+  triggerScan: protectedProcedure
+    .input(z.object({ scan_id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify scan belongs to this user
+      const { data: scan } = await ctx.supabase
+        .from('scans')
+        .select('id, status')
+        .eq('id', input.scan_id)
+        .eq('user_id', ctx.user.id)
+        .single()
+
+      if (!scan) throw new TRPCError({ code: 'NOT_FOUND' })
+      if (scan.status !== 'pending') {
+        throw new TRPCError({ 
+          code: 'BAD_REQUEST', 
+          message: 'Scan already processing or complete' 
+        })
+      }
+
+      // Fire edge function (don't await — let it run async)
+      fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/analyze-scan`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ scan_id: input.scan_id })
+      }).catch(err => console.error("Failed to trigger edge function:", err))
+
+      return { triggered: true }
+    }),
+
+  getWithFindings: protectedProcedure
+    .input(z.object({ scan_id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { data } = await ctx.supabase
+        .from('scans')
+        .select('*, scan_findings(*), pets(name, breed)')
+        .eq('id', input.scan_id)
+        .eq('user_id', ctx.user.id)
+        .single()
+
+      return data
+    })
 });

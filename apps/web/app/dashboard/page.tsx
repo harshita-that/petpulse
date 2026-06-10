@@ -223,11 +223,14 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                <button className="mt-4 w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-[#E8F5EF] text-[#2D9B6F] rounded-xl text-sm font-semibold hover:bg-[#D4F0E4] transition-colors">
+                <Link 
+                  href={`/scan/new`}
+                  className="mt-4 w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-[#E8F5EF] text-[#2D9B6F] rounded-xl text-sm font-semibold hover:bg-[#D4F0E4] transition-colors"
+                >
                   <Activity className="w-3.5 h-3.5" />
                   Scan health
                   <ChevronRight className="w-3.5 h-3.5" />
-                </button>
+                </Link>
               </motion.div>
             ))}
           </div>
