@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase';
 import {
   Plus, LogOut, PawPrint, Calendar, Weight, Palette,
-  ChevronRight, Trash2, X, Activity
+  ChevronRight, Trash2, X, Activity, Pencil
 } from 'lucide-react';
 import PawIcon from '@/components/petpulse/PawIcon';
 import type { User } from '@supabase/supabase-js';
@@ -33,6 +33,8 @@ export default function DashboardPage() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingPet, setEditingPet] = useState<Pet | null>(null);
+  const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -59,11 +61,13 @@ export default function DashboardPage() {
     router.push('/');
   }
 
-  async function deletePet(id: string) {
-    const { error } = await supabase.from('pets').delete().eq('id', id);
+  async function confirmDeletePet() {
+    if (!deletingPetId) return;
+    const { error } = await supabase.from('pets').delete().eq('id', deletingPetId);
     if (!error) {
-      setPets(pets.filter(p => p.id !== id));
+      setPets(pets.filter(p => p.id !== deletingPetId));
     }
+    setDeletingPetId(null);
   }
 
   if (loading) {
@@ -167,12 +171,22 @@ export default function DashboardPage() {
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E8F5EF] to-[#C5E8D8] flex items-center justify-center">
                     <PawPrint className="w-6 h-6 text-[#2D9B6F]" />
                   </div>
-                  <button
-                    onClick={() => deletePet(pet.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-[#B8B3A8] hover:text-red-500 hover:bg-red-50 transition-all"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      onClick={() => setEditingPet(pet)}
+                      className="p-1.5 rounded-lg text-[#B8B3A8] hover:text-[#2D9B6F] hover:bg-[#E8F5EF] transition-all"
+                      title="Edit pet"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingPetId(pet.id)}
+                      className="p-1.5 rounded-lg text-[#B8B3A8] hover:text-red-500 hover:bg-red-50 transition-all"
+                      title="Delete pet"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <h3 className="text-lg font-display font-bold text-[#1A1A1A] mb-1">{pet.name}</h3>
@@ -223,65 +237,151 @@ export default function DashboardPage() {
       {/* Add Pet Modal */}
       <AnimatePresence>
         {showAddModal && (
-          <AddPetModal
+          <PetFormModal
+            title="Add a Pet"
+            submitLabel="Add Pet"
             supabase={supabase}
             onClose={() => setShowAddModal(false)}
-            onAdded={(pet: Pet) => {
+            onSaved={(pet: Pet) => {
               setPets([pet, ...pets]);
               setShowAddModal(false);
             }}
           />
         )}
       </AnimatePresence>
+
+      {/* Edit Pet Modal */}
+      <AnimatePresence>
+        {editingPet && (
+          <PetFormModal
+            title="Edit Pet"
+            submitLabel="Save Changes"
+            pet={editingPet}
+            supabase={supabase}
+            onClose={() => setEditingPet(null)}
+            onSaved={(updated: Pet) => {
+              setPets(pets.map(p => p.id === updated.id ? updated : p));
+              setEditingPet(null);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation */}
+      <AnimatePresence>
+        {deletingPetId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            onClick={() => setDeletingPetId(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
+            >
+              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-display font-bold text-[#1A1A1A] text-center mb-2">Delete this pet?</h3>
+              <p className="text-sm text-[#6B7280] text-center mb-6">
+                This will permanently remove this pet and all their scan data. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeletingPetId(null)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border-2 border-[#E8E4DA] text-[#1A1A1A] font-semibold text-sm hover:bg-[#F3F0E8] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeletePet}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-function AddPetModal({ supabase, onClose, onAdded }: {
+/* ─── Shared Pet Form Modal (Add + Edit) ─── */
+function PetFormModal({ title, submitLabel, pet, supabase, onClose, onSaved }: {
+  title: string;
+  submitLabel: string;
+  pet?: Pet;
   supabase: ReturnType<typeof createClient>;
   onClose: () => void;
-  onAdded: (pet: Pet) => void;
+  onSaved: (pet: Pet) => void;
 }) {
-  const [name, setName] = useState('');
-  const [breed, setBreed] = useState('');
-  const [age, setAge] = useState('');
-  const [weight, setWeight] = useState('');
-  const [sex, setSex] = useState('');
-  const [color, setColor] = useState('');
-  const [conditions, setConditions] = useState('');
+  const [name, setName] = useState(pet?.name || '');
+  const [breed, setBreed] = useState(pet?.breed || '');
+  const [age, setAge] = useState(pet?.age?.toString() || '');
+  const [weight, setWeight] = useState(pet?.weight?.toString() || '');
+  const [sex, setSex] = useState(pet?.sex || '');
+  const [color, setColor] = useState(pet?.color || '');
+  const [conditions, setConditions] = useState(pet?.conditions?.join(', ') || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const isEditing = !!pet;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const payload = {
+      name,
+      breed: breed || null,
+      age: age ? parseFloat(age) : null,
+      weight: weight ? parseFloat(weight) : null,
+      sex: sex || null,
+      color: color || null,
+      conditions: conditions ? conditions.split(',').map(c => c.trim()).filter(Boolean) : [],
+    };
 
-    const { data, error: insertError } = await supabase
-      .from('pets')
-      .insert({
-        user_id: user.id,
-        name,
-        breed: breed || null,
-        age: age ? parseFloat(age) : null,
-        weight: weight ? parseFloat(weight) : null,
-        sex: sex || null,
-        color: color || null,
-        conditions: conditions ? conditions.split(',').map(c => c.trim()).filter(Boolean) : [],
-      })
-      .select()
-      .single();
+    if (isEditing) {
+      // Update existing pet
+      const { data, error: updateError } = await supabase
+        .from('pets')
+        .update(payload)
+        .eq('id', pet.id)
+        .select()
+        .single();
 
-    if (insertError) {
-      setError(insertError.message);
-      setLoading(false);
-      return;
+      if (updateError) {
+        setError(updateError.message);
+        setLoading(false);
+        return;
+      }
+      onSaved(data as Pet);
+    } else {
+      // Create new pet
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error: insertError } = await supabase
+        .from('pets')
+        .insert({ ...payload, user_id: user.id })
+        .select()
+        .single();
+
+      if (insertError) {
+        setError(insertError.message);
+        setLoading(false);
+        return;
+      }
+      onSaved(data as Pet);
     }
-
-    onAdded(data as Pet);
   }
 
   return (
@@ -300,7 +400,7 @@ function AddPetModal({ supabase, onClose, onAdded }: {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
       >
         <div className="flex items-center justify-between p-6 border-b border-[#E8E4DA]">
-          <h3 className="text-xl font-display font-bold text-[#1A1A1A]">Add a Pet</h3>
+          <h3 className="text-xl font-display font-bold text-[#1A1A1A]">{title}</h3>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F3F0E8] text-[#6B7280]">
             <X className="w-5 h-5" />
           </button>
@@ -410,7 +510,7 @@ function AddPetModal({ supabase, onClose, onAdded }: {
             ) : (
               <>
                 <PawPrint className="w-4 h-4" />
-                Add Pet
+                {submitLabel}
               </>
             )}
           </button>
