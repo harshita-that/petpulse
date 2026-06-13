@@ -66,21 +66,21 @@ Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
 - [x] Scan results written to `scan_findings` table
 - [x] Health score calculated and stored
 
-### 1C — Web Dashboard (Weeks 7–8) ⏳ IN PROGRESS
+### 1C — Web Dashboard (Weeks 7–8) ✅ DONE
 
 | Task | Details |
 |------|---------|
-| Dashboard | Authenticated app shell: sidebar nav, pet switcher |
+| Dashboard | Stats bar, recent scans, pet cards with health scores, quick actions |
 | Scan flow | Upload photo → Realtime loading state → results page |
 | Results page | Health score, finding cards, severity badges |
-| Pet profile | View/edit pet details, scan history list |
+| Pet profile | View pet details, full scan history per pet |
 | Responsive | Desktop + tablet + mobile web |
 
 **Deliverables**:
-- [x] Logged-in dashboard with pet management
+- [x] Logged-in dashboard with pet management + stats overview
 - [x] End-to-end scan flow working (upload → AI → results)
-- [ ] Scan history per pet
-- [ ] Deployed to staging, internal testing complete
+- [x] Scan history per pet (dedicated /pets/[id] page)
+- [x] Deployed to staging, internal testing complete
 
 **Phase 1 Exit Criteria**: A user can sign up, add a pet, upload a photo, and receive an AI health score with findings.
 

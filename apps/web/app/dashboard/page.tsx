@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase';
 import {
   Plus, LogOut, PawPrint, Calendar, Weight, Palette,
-  ChevronRight, Trash2, X, Activity, Pencil
+  ChevronRight, Trash2, X, Activity, Pencil, Zap,
+  TrendingUp, Clock, BarChart3
 } from 'lucide-react';
 import PawIcon from '@/components/petpulse/PawIcon';
 import type { User } from '@supabase/supabase-js';
@@ -25,16 +26,47 @@ interface Pet {
   created_at: string;
 }
 
+interface Scan {
+  id: string;
+  pet_id: string;
+  scan_type: string;
+  status: string;
+  health_score: number | null;
+  created_at: string;
+  pets: { name: string } | null;
+}
+
+const SCAN_ICONS: Record<string, string> = {
+  teeth: '🦷', eyes: '👁️', skin: '🐾', body: '🐕'
+};
+
+function scoreColor(score: number) {
+  if (score >= 80) return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+  if (score >= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+  return 'text-red-600 bg-red-50 border-red-200';
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
 
   const [user, setUser] = useState<User | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
+  const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
+
+  // Map of pet_id -> latest health score
+  const [petScores, setPetScores] = useState<Record<string, number | null>>({});
 
   useEffect(() => {
     async function init() {
@@ -45,12 +77,33 @@ export default function DashboardPage() {
       }
       setUser(user);
 
+      // Fetch pets
       const { data: petsData } = await supabase
         .from('pets')
         .select('*')
         .order('created_at', { ascending: false });
-
       setPets(petsData || []);
+
+      // Fetch recent scans (last 5, across all pets)
+      const { data: scansData } = await supabase
+        .from('scans')
+        .select('id, pet_id, scan_type, status, health_score, created_at, pets(name)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      setRecentScans((scansData as unknown as Scan[]) || []);
+
+      // Build per-pet latest scores
+      const scores: Record<string, number | null> = {};
+      if (scansData) {
+        for (const scan of scansData as unknown as Scan[]) {
+          if (scan.status === 'complete' && scan.health_score != null && !scores[scan.pet_id]) {
+            scores[scan.pet_id] = scan.health_score;
+          }
+        }
+      }
+      setPetScores(scores);
+
       setLoading(false);
     }
     init();
@@ -70,16 +123,23 @@ export default function DashboardPage() {
     setDeletingPetId(null);
   }
 
+  const completedScans = recentScans.filter(s => s.status === 'complete');
+  const avgScore = completedScans.length > 0
+    ? Math.round(completedScans.reduce((sum, s) => sum + (s.health_score ?? 0), 0) / completedScans.length)
+    : null;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-3 border-[#2D9B6F]/20 border-t-[#2D9B6F] rounded-full animate-spin" />
-          <p className="text-[#6B7280] text-sm">Loading your pets...</p>
+          <p className="text-[#6B7280] text-sm">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]">
@@ -110,21 +170,133 @@ export default function DashboardPage() {
 
       {/* Main */}
       <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Welcome */}
+
+        {/* Welcome + Quick Action */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4"
         >
-          <h1 className="text-3xl font-display font-bold text-[#1A1A1A] mb-1">
-            Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ''} 🐾
-          </h1>
-          <p className="text-[#6B7280]">Manage your pets and track their health.</p>
+          <div>
+            <h1 className="text-3xl font-display font-bold text-[#1A1A1A] mb-1">
+              {getGreeting()}, {displayName} 🐾
+            </h1>
+            <p className="text-[#6B7280]">Here's how your pets are doing.</p>
+          </div>
+          <Link
+            href="/scan/new"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[#F4845F] text-white rounded-xl font-semibold text-sm hover:bg-[#e8734e] transition-colors shadow-sm whitespace-nowrap"
+          >
+            <Zap className="w-4 h-4" />
+            New Scan
+          </Link>
         </motion.div>
+
+        {/* Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+        >
+          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5">
+            <div className="flex items-center gap-2 text-[#6B7280] text-xs font-medium mb-2">
+              <PawPrint className="w-3.5 h-3.5" /> Total Pets
+            </div>
+            <p className="text-2xl font-bold text-[#1A1A1A]">{pets.length}</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5">
+            <div className="flex items-center gap-2 text-[#6B7280] text-xs font-medium mb-2">
+              <Activity className="w-3.5 h-3.5" /> Total Scans
+            </div>
+            <p className="text-2xl font-bold text-[#1A1A1A]">{recentScans.length}</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5">
+            <div className="flex items-center gap-2 text-[#6B7280] text-xs font-medium mb-2">
+              <TrendingUp className="w-3.5 h-3.5" /> Avg Score
+            </div>
+            <p className="text-2xl font-bold text-[#1A1A1A]">{avgScore ?? '—'}</p>
+          </div>
+          <div className="bg-white rounded-2xl border border-[#E8E4DA] p-5">
+            <div className="flex items-center gap-2 text-[#6B7280] text-xs font-medium mb-2">
+              <Clock className="w-3.5 h-3.5" /> Last Scan
+            </div>
+            <p className="text-sm font-semibold text-[#1A1A1A]">
+              {recentScans[0]
+                ? new Date(recentScans[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : '—'}
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Recent Scans */}
+        {recentScans.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-10"
+          >
+            <h2 className="text-lg font-display font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
+              <BarChart3 className="w-4.5 h-4.5 text-[#2D9B6F]" />
+              Recent Scans
+            </h2>
+            <div className="space-y-2">
+              {recentScans.map((scan, i) => (
+                <motion.div
+                  key={scan.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.12 + i * 0.04 }}
+                >
+                  {scan.status === 'complete' ? (
+                    <Link
+                      href={`/scan/${scan.id}/results`}
+                      className="flex items-center gap-4 bg-white rounded-xl border border-[#E8E4DA] px-5 py-3.5 hover:shadow-md hover:border-[#2D9B6F]/30 transition-all group"
+                    >
+                      <span className="text-xl">{SCAN_ICONS[scan.scan_type] || '📋'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-[#1A1A1A] truncate">
+                          {(scan.pets as any)?.name ?? 'Pet'} — <span className="capitalize">{scan.scan_type}</span>
+                        </p>
+                        <p className="text-xs text-[#6B7280]">
+                          {new Date(scan.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      {scan.health_score != null && (
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${scoreColor(scan.health_score)}`}>
+                          {scan.health_score}
+                        </span>
+                      )}
+                      <ChevronRight className="w-4 h-4 text-[#B8B3A8] group-hover:text-[#2D9B6F] transition-colors" />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-4 bg-white rounded-xl border border-[#E8E4DA] px-5 py-3.5 opacity-60">
+                      <span className="text-xl">{SCAN_ICONS[scan.scan_type] || '📋'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-[#1A1A1A] truncate">
+                          {(scan.pets as any)?.name ?? 'Pet'} — <span className="capitalize">{scan.scan_type}</span>
+                        </p>
+                        <p className="text-xs text-[#6B7280]">
+                          {new Date(scan.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                        scan.status === 'failed' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'
+                      }`}>
+                        {scan.status === 'failed' ? 'Failed' : 'Processing'}
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Pets grid */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-display font-bold text-[#1A1A1A]">
+          <h2 className="text-lg font-display font-bold text-[#1A1A1A]">
             Your Pets ({pets.length})
           </h2>
           <button
@@ -171,17 +343,24 @@ export default function DashboardPage() {
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E8F5EF] to-[#C5E8D8] flex items-center justify-center">
                     <PawPrint className="w-6 h-6 text-[#2D9B6F]" />
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+
+                  <div className="flex items-center gap-1">
+                    {/* Latest score badge */}
+                    {petScores[pet.id] != null && (
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full border mr-1 ${scoreColor(petScores[pet.id]!)}`}>
+                        {petScores[pet.id]}
+                      </span>
+                    )}
                     <button
                       onClick={() => setEditingPet(pet)}
-                      className="p-1.5 rounded-lg text-[#B8B3A8] hover:text-[#2D9B6F] hover:bg-[#E8F5EF] transition-all"
+                      className="p-1.5 rounded-lg text-[#B8B3A8] hover:text-[#2D9B6F] hover:bg-[#E8F5EF] transition-all opacity-0 group-hover:opacity-100"
                       title="Edit pet"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setDeletingPetId(pet.id)}
-                      className="p-1.5 rounded-lg text-[#B8B3A8] hover:text-red-500 hover:bg-red-50 transition-all"
+                      className="p-1.5 rounded-lg text-[#B8B3A8] hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
                       title="Delete pet"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -189,8 +368,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <h3 className="text-lg font-display font-bold text-[#1A1A1A] mb-1">{pet.name}</h3>
-                <p className="text-sm text-[#6B7280] mb-3">{pet.breed || 'Unknown breed'}</p>
+                <Link href={`/pets/${pet.id}`} className="block mb-3">
+                  <h3 className="text-lg font-display font-bold text-[#1A1A1A] mb-1 group-hover:text-[#2D9B6F] transition-colors">{pet.name}</h3>
+                  <p className="text-sm text-[#6B7280]">{pet.breed || 'Unknown breed'}</p>
+                </Link>
 
                 <div className="space-y-1.5 text-xs text-[#6B7280]">
                   {pet.age && (
@@ -223,14 +404,23 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                <Link 
-                  href={`/scan/new`}
-                  className="mt-4 w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-[#E8F5EF] text-[#2D9B6F] rounded-xl text-sm font-semibold hover:bg-[#D4F0E4] transition-colors"
-                >
-                  <Activity className="w-3.5 h-3.5" />
-                  Scan health
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </Link>
+                <div className="flex gap-2 mt-4">
+                  <Link
+                    href={`/pets/${pet.id}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-[#E8E4DA] text-[#1A1A1A] rounded-xl text-sm font-semibold hover:border-[#2D9B6F] transition-colors"
+                  >
+                    <BarChart3 className="w-3.5 h-3.5" />
+                    History
+                  </Link>
+                  <Link
+                    href={`/scan/new`}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#E8F5EF] text-[#2D9B6F] rounded-xl text-sm font-semibold hover:bg-[#D4F0E4] transition-colors"
+                  >
+                    <Activity className="w-3.5 h-3.5" />
+                    Scan
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </motion.div>
             ))}
           </div>
