@@ -5,9 +5,9 @@
 6 phases. Landing page to B2B platform. Each phase is a shippable product increment.
 
 ```
-Phase 0 ✅  →  Phase 1  →  Phase 2  →  Phase 3  →  Phase 4  →  Phase 5
-Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
-(Done)       8 weeks      6 weeks       6 weeks       8 weeks     Ongoing
+Phase 0 ✅  →  Phase 1 ✅  →  Phase 2  →  Phase 3  →  Phase 4  →  Phase 5
+Landing      Core App       Intelligence  Monetization  Mobile      B2B/Scale
+(Done)       (Done)         6 weeks       6 weeks       8 weeks     Ongoing
 ```
 
 ---
@@ -27,7 +27,7 @@ Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
 
 ---
 
-## Phase 1 — Core App (Weeks 1–8)
+## Phase 1 — Core App (Weeks 1–8) ✅ DONE
 
 **Goal**: Users can create accounts, add pets, upload photos, and get basic AI health scores.
 
@@ -54,7 +54,7 @@ Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
 | Task | Details |
 |------|---------|
 | AI service | Serverless Supabase Edge Function (`analyze-scan`) |
-| Model V1 | Zero-infrastructure analysis using Google Gemini 1.5 Flash Vision |
+| Model V1 | Zero-infrastructure analysis using Google Gemini 2.5 Flash Vision |
 | Scan types | Teeth, eyes, skin, body condition (4 scan modes) |
 | Processing | Upload → DB Webhook Trigger → AI inference → write results |
 | Health score | Weighted severity aggregation → 0–100 score |
@@ -82,7 +82,7 @@ Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
 - [x] Scan history per pet (dedicated /pets/[id] page)
 - [x] Deployed to staging, internal testing complete
 
-**Phase 1 Exit Criteria**: A user can sign up, add a pet, upload a photo, and receive an AI health score with findings.
+**Phase 1 Exit Criteria**: A user can sign up, add a pet, upload a photo, and receive an AI health score with findings. ✅ **MET**
 
 ---
 
@@ -258,7 +258,7 @@ Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
 | Phase | Engineering | Design | AI/ML | Cost Estimate |
 |-------|------------|--------|-------|---------------|
 | 0 ✅ | 1 | 0 | 0 | $0 |
-| 1 | 1–2 | 1 | 1 | $2K/mo (infra) |
+| 1 ✅ | 1 | 0 | 0 | ~$0 (Supabase free tier + Gemini free tier) |
 | 2 | 1–2 | 0.5 | 1 | $3K/mo |
 | 3 | 1–2 | 0.5 | 0 | $4K/mo (+ Stripe fees) |
 | 4 | 2 | 1 | 0.5 | $5K/mo |
@@ -282,7 +282,7 @@ Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
 
 | Decision | Options | Deadline |
 |----------|---------|----------|
-| Hosting: Supabase vs self-hosted PG | Supabase (faster) vs AWS RDS (more control) | Phase 1 start |
+| Hosting: Supabase vs self-hosted PG | ✅ **Supabase** — auth, DB, storage, edge functions, realtime | Resolved |
 | Mobile: React Native vs Flutter | RN (JS ecosystem) vs Flutter (performance) | Phase 4 start |
-| AI: Fine-tune vs API (GPT-4V) | Own model (moat) vs API (faster MVP) | Phase 1B start |
+| AI: Fine-tune vs API | ✅ **Gemini 2.5 Flash API** via Supabase Edge Functions — zero infra cost | Resolved |
 | Vet chat: Build vs buy | Custom chat vs integrate Intercom/Zendesk | Phase 3B start |
