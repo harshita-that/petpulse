@@ -52,10 +52,10 @@ serve(async (req) => {
     const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)))
     const mimeType = file.type || 'image/jpeg'
 
-    // 4. Call Gemini 1.5 Flash Vision
+    // 4. Call Gemini 2.5 Flash Vision
     const promptText = buildPrompt(scan.scan_type, scan.pets)
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
