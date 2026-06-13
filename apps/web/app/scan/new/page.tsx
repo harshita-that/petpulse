@@ -79,10 +79,10 @@ export default function NewScanPage() {
 
       if (scanError) throw scanError
 
-      // 3. Trigger AI analysis
-      await supabase.functions.invoke('analyze-scan', {
+      // 3. Trigger AI analysis asynchronously (so we can transition to processing screen immediately)
+      supabase.functions.invoke('analyze-scan', {
         body: { scan_id: scan.id }
-      })
+      }).catch(err => console.error('Background analysis failed:', err))
 
       // 4. Navigate to processing page
       router.push(`/scan/${scan.id}/processing`)
