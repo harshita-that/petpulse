@@ -20,8 +20,11 @@ serve(async (req) => {
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  let scan_id: string | null = null;
+
   try {
-    const { scan_id } = await req.json()
+    const body = await req.json()
+    scan_id = body.scan_id
     if (!scan_id) throw new Error('scan_id is required')
 
     // 1. Fetch scan + pet context
@@ -118,15 +121,14 @@ serve(async (req) => {
     console.error('Error processing scan:', err)
     
     // Attempt to update the scan status to failed
-    try {
-      const { scan_id } = await req.json().catch(() => ({}))
-      if (scan_id) {
-         await supabase.from('scans')
+    if (scan_id) {
+      try {
+        await supabase.from('scans')
           .update({ status: 'failed', error_message: err.message || 'Unknown error' })
           .eq('id', scan_id)
+      } catch (e) {
+        console.error('Failed to update scan status on error:', e)
       }
-    } catch (e) {
-      console.error('Failed to update scan status on error:', e)
     }
 
     return new Response(

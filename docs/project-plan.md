@@ -31,7 +31,7 @@ Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
 
 **Goal**: Users can create accounts, add pets, upload photos, and get basic AI health scores.
 
-### 1A — Foundation (Weeks 1–3)
+### 1A — Foundation (Weeks 1–3) ✅ DONE
 
 | Task | Details |
 |------|---------|
@@ -39,46 +39,46 @@ Landing      Core App     Intelligence  Monetization  Mobile      B2B/Scale
 | Database | PostgreSQL via Supabase — User, Pet, Scan, ScanFinding tables |
 | Auth | Supabase Auth: email/password, Google OAuth, Apple OAuth |
 | API layer | tRPC routes: auth, pets CRUD, scans CRUD |
-| Image upload | S3 presigned upload flow, image quality validation (blur, resolution) |
+| Image upload | Supabase Storage upload flow, image quality validation |
 | CI/CD | GitHub Actions: lint, type-check, test, deploy to Vercel (staging) |
 
 **Deliverables**:
-- [ ] Supabase project provisioned (auth, DB, storage)
-- [ ] User signup/login flow working
-- [ ] Pet profile CRUD (name, breed, age, weight, conditions)
-- [ ] Image upload pipeline (capture → validate → S3)
-- [ ] API tests passing
+- [x] Supabase project provisioned (auth, DB, storage)
+- [x] User signup/login flow working
+- [x] Pet profile CRUD (name, breed, age, weight, conditions)
+- [x] Image upload pipeline (capture → validate → Storage)
+- [x] API tests passing
 
-### 1B — AI Scan V1 (Weeks 4–6)
+### 1B — AI Scan Pipeline (Weeks 4–6) ✅ DONE
 
 | Task | Details |
 |------|---------|
-| AI service | FastAPI service, Dockerized, deployed to AWS ECS |
-| Model V1 | Fine-tune DINOv2 on open veterinary image datasets |
+| AI service | Serverless Supabase Edge Function (`analyze-scan`) |
+| Model V1 | Zero-infrastructure analysis using Google Gemini 1.5 Flash Vision |
 | Scan types | Teeth, eyes, skin, body condition (4 scan modes) |
-| Processing | Upload → SQS queue → AI inference → write results → notify |
+| Processing | Upload → DB Webhook Trigger → AI inference → write results |
 | Health score | Weighted severity aggregation → 0–100 score |
 | Findings | Per-region labels, confidence %, severity (normal/watch/concern/urgent) |
 
 **Deliverables**:
-- [ ] AI service running, accepting image jobs via queue
-- [ ] Model V1 trained, serving inference < 10 seconds
-- [ ] Scan results written to ScanFinding table
-- [ ] Health score calculated and stored
+- [x] Edge Function deployed, triggered securely from frontend
+- [x] Gemini Vision pipeline integrated and running in < 10 seconds
+- [x] Scan results written to `scan_findings` table
+- [x] Health score calculated and stored
 
-### 1C — Web Dashboard (Weeks 7–8)
+### 1C — Web Dashboard (Weeks 7–8) ⏳ IN PROGRESS
 
 | Task | Details |
 |------|---------|
 | Dashboard | Authenticated app shell: sidebar nav, pet switcher |
-| Scan flow | Upload photo → loading state → results page |
-| Results page | Health score, region markers on image, finding cards, severity badges |
+| Scan flow | Upload photo → Realtime loading state → results page |
+| Results page | Health score, finding cards, severity badges |
 | Pet profile | View/edit pet details, scan history list |
 | Responsive | Desktop + tablet + mobile web |
 
 **Deliverables**:
-- [ ] Logged-in dashboard with pet management
-- [ ] End-to-end scan flow working (upload → AI → results)
+- [x] Logged-in dashboard with pet management
+- [x] End-to-end scan flow working (upload → AI → results)
 - [ ] Scan history per pet
 - [ ] Deployed to staging, internal testing complete
 
